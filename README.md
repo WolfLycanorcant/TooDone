@@ -105,13 +105,12 @@ source venv/bin/activate
 
 #The prompt will change to have (venv) at the beginning of the line. Then run
 python Productivity.py
-```
+
 
 Or you can double click the exe file labeled Productivity_App_Start.exe
 
-```bash
-.\Productivity_App_Start.exe
-```
+> 🔘 **Launch:** `./Productivity_App_Start.exe`
+
 
 ### Basic Commands
 
