@@ -46,7 +46,23 @@ python -m venv venv
 .\venv\Scripts\activate
 ```
 
+### Step 3: Create a .env file
 
+make a copy of the example environment file, but change the name of the file:
+
+copy .env.example and rename it the shorter name of .env
+
+
+You can choose to edit the `.env` file and add your API keys and configuration. Like this:
+
+```bash
+GROQ_API_KEY=your_groq_api_key #paste over
+TODOIST_API_TOKEN=your_todoist_token #paste over
+
+GROQ_MODEL_NAME=llama-3.3-70b-versatile 
+BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
+MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
+```
 
 
 # On macOS/Linux
@@ -63,7 +79,16 @@ To enter the environment run
 source venv/bin/activate
 ```
 
+### Running the Application
+Again, make sure the environment is activated by
 
+```bash
+source venv/bin/activate
+```
+
+#The prompt will change to have (venv) at the beginning of the line. Then run
+
+**Command Line:** `python Productivity.py`
 
 ### Step 3: Install Dependencies
 
@@ -78,11 +103,14 @@ Copy the example environment file:
 copy .env.example and rename it the shorter name of .env
 
 
-1. Edit the `.env` file and add your API keys and configuration. Like this:
+### Step 4: Run the App
+
+
+Edit the `.env` file and add your API keys and configuration. Like this:
 
 ```bash
-GROQ_API_KEY=your_groq_api_key 
-TODOIST_API_TOKEN=your_todoist_token
+GROQ_API_KEY=your_groq_api_key #paste over
+TODOIST_API_TOKEN=your_todoist_token #paste over
 
 GROQ_MODEL_NAME=llama-3.3-70b-versatile 
 BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
@@ -91,20 +119,27 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 
 
       
-2. OR fill in the premade app fields by clicking on the setup button on the lower right in the app and paste your api keys
+2. If changing an api key is required after setup there are premade app fields you can click in the setup page by using the setup page button on the lower right in the app and paste your api keys
 
 ## Usage
 
-### Running the Application
-Make sure the environment is activated by
-
-```bash
-source venv/bin/activate
-```
 
 
-#The prompt will change to have (venv) at the beginning of the line. Then run
-python Productivity.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Or you can double click the exe file labeled Productivity_App_Start.exe
@@ -120,22 +155,6 @@ Or you can double click the exe file labeled Productivity_App_Start.exe
 🗑️  Delete    →  Delete selected task  
 ❓  F1         →  Show keyboard shortcuts
 
-## Configuration
-
-### Environment Variables
-
-Edit the `.env` file to configure application settings:
-
-```ini
-# API Keys
-GROQ_API_KEY=your_groq_api_key
-TODOIST_API_TOKEN=your_todoist_token
-
-# Application Settings
-GROQ_MODEL_NAME=llama-3.3-70b-versatile
-BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg
-MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
-```
 
 ## Directory Structure
 
