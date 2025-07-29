@@ -16,16 +16,16 @@ TooDone is a comprehensive productivity application designed to help you manage 
 - 🛎️ **Reminders & Notifications**: Never miss important deadlines
 - 🔄 **Cross-Platform**: Works on Windows, macOS, and Linux
 
+
 ## Installation
 
-### Prerequisites
 
+### Prerequisites
 - Python 3.8 or higher
 - pip (Python package manager)
 - Git (for cloning the repository)
 
 ### Step 1: Clone the Repository
-
 ```bash
 git clone https://github.com/WolfLycanorcant/TooDone.git
 cd TooDone
@@ -33,13 +33,33 @@ cd TooDone
 
 ### Step 2: Set Up Virtual Environment (Recommended)
 
-```bash
 # On Windows
+#To set up the environment run
+
+```bash
 python -m venv venv
+```
+
+#To enter the environment run
+
+```bash
 .\venv\Scripts\activate
+```
+
+
+
 
 # On macOS/Linux
+
+#set up the environment
+
+'''bash
 python3 -m venv venv
+'''
+
+#To enter the environment run
+
+'''bash
 source venv/bin/activate
 ```
 
@@ -51,14 +71,15 @@ pip install -r requirements.txt
 
 ### Step 4: Configure Environment Variables
 
-!. Copy the example environment file:
-   ```bash
-   copy .env.example and rename it the shorter name of .env
-   ```
+Copy the example environment file:
+```bash
+copy .env.example and rename it the shorter name of .env
+```
+
 1. Edit the `.env` file and add your API keys and configuration. Like this:
-   
-# API Keys
+
 '''
+# API Keys
 GROQ_API_KEY=your_groq_api_key
 TODOIST_API_TOKEN=your_todoist_token
 
@@ -69,6 +90,7 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 '''
 
       or
+      
 2. click on the setup button in the app to add the api keys
 
 ## Usage
@@ -79,6 +101,7 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 #Make sure the environment is activated by
 source venv/bin/activate
 '''
+
 
 #The prompt will change to have (venv) at the beginning of the line. Then run
 python Productivity.py
