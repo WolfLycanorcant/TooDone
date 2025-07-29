@@ -53,9 +53,9 @@ python -m venv venv
 
 Set up the environment
 
-''' 'code' bash
+```bash
 python3 -m venv venv
-'''
+```
 
 To enter the environment run
 
