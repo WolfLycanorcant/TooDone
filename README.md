@@ -79,6 +79,8 @@ To enter the environment run
 source venv/bin/activate
 ```
 
+If changing an api key is required after setup there are premade app fields you can click in the setup page by using the setup page button on the lower right in the app and paste your api keys
+
 ### Running the Application
 Again, make sure the environment is activated by
 
@@ -88,66 +90,24 @@ source venv/bin/activate
 
 #The prompt will change to have (venv) at the beginning of the line. Then run
 
-**Command Line:** `python Productivity.py`
-
-### Step 3: Install Dependencies
+### Step 4: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Configure Environment Variables
-
-Copy the example environment file:
-
-copy .env.example and rename it the shorter name of .env
-
-
-### Step 4: Run the App
-
-
-Edit the `.env` file and add your API keys and configuration. Like this:
-
-```bash
-GROQ_API_KEY=your_groq_api_key #paste over
-TODOIST_API_TOKEN=your_todoist_token #paste over
-
-GROQ_MODEL_NAME=llama-3.3-70b-versatile 
-BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
-MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
-```
-
-
-      
-2. If changing an api key is required after setup there are premade app fields you can click in the setup page by using the setup page button on the lower right in the app and paste your api keys
-
 ## Usage
 
+**Command Line:** `python Productivity.py`
 
+Or you can double click the exe file labeled Productivity_App_Start.exe, after environment confiuration using defaults. If it doesnt work
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Or you can double click the exe file labeled Productivity_App_Start.exe
+**Command Line:** `python Productivity.py`
 
 > 🔘 **Launch:** `./Productivity_App_Start.exe`
 
 
-### Basic Commands
+### Basic Hot key shortcut Commands
 
 🆕  Ctrl + N  →  Create a new task  
 🔍  Ctrl + F  →  Search tasks  
@@ -199,5 +159,5 @@ For support, please open an issue in the GitHub repository.
 ---
 
 <div align="center">
-  Made with ❤️ by Your Name
+  Made with 🔥 by WolfLycanorcant
 </div>
