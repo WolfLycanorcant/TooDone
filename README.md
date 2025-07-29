@@ -114,11 +114,11 @@ Or you can double click the exe file labeled Productivity_App_Start.exe
 
 ### Basic Commands
 
-- `Ctrl+N`: Create a new task
-- `Ctrl+F`: Search tasks
-- `Ctrl+E`: Edit selected task
-- `Delete`: Delete selected task
-- `F1`: Show keyboard shortcuts
+🆕  Ctrl + N  →  Create a new task  
+🔍  Ctrl + F  →  Search tasks  
+✏️  Ctrl + E  →  Edit selected task  
+🗑️  Delete    →  Delete selected task  
+❓  F1         →  Show keyboard shortcuts
 
 ## Configuration
 
