@@ -1,0 +1,36 @@
+# Core Dependencies
+python-dotenv>=0.19.0  # For .env file support
+pytz>=2021.1          # For timezone support
+
+# GUI Framework
+kivy>=2.0.0           # Main GUI framework
+pygame>=2.0.0          # For audio and multimedia support
+
+# Development Tools
+wheel>=0.36.2          # For building wheels
+setuptools>=56.0.0     # For package management
+
+# Build Dependencies
+# These are included for building the application
+cython>=0.29.23
+
+# Optional Dependencies
+# Uncomment these if you need additional functionality
+# groq>=0.3.0           # For Groq API integration
+# python-todoist         # For Todoist integration
+
+# Platform-specific dependencies
+# These might be needed for specific platforms
+# kivy-deps.angle==0.3.0  # For Windows ANGLE support
+# kivy-deps.glew==0.3.0   # For Windows GLEW support
+# kivy-deps.sdl2==0.3.1   # For Windows SDL2 support
+
+# For building executables (optional)
+# pyinstaller>=4.5.1     # For creating standalone executables
+
+# Development dependencies (not needed in production)
+# pytest>=6.2.4          # For running tests
+# pytest-cov>=2.11.1     # For test coverage reporting
+# pylint>=2.8.2          # For code linting
+# black>=21.7b0          # For code formatting
+# mypy>=0.910            # For static type checking
