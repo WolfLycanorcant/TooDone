@@ -52,16 +52,16 @@ python -m venv venv
 # On macOS/Linux
 
 #set up the environment
-
 '''bash
 python3 -m venv venv
 '''
 
 #To enter the environment run
-
 '''bash
 source venv/bin/activate
 ```
+
+
 
 ### Step 3: Install Dependencies
 
