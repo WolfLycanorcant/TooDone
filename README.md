@@ -78,7 +78,7 @@ copy .env.example and rename it the shorter name of .env
 
 1. Edit the `.env` file and add your API keys and configuration. Like this:
 
-'''
+'''bash
 # API Keys
 GROQ_API_KEY=your_groq_api_key
 TODOIST_API_TOKEN=your_todoist_token
