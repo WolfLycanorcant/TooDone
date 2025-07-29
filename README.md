@@ -91,7 +91,7 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 
 
       
-2. OR fill in the premade fields by clicking on the setup button in the app to add your api keys
+2. OR fill in the premade app fields by clicking on the setup button in the app to add your api keys
 
 ## Usage
 
