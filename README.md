@@ -56,7 +56,9 @@ pip install -r requirements.txt
    copy .env.example and rename it the shorter name of .env
    ```
 1. Edit the `.env` file and add your API keys and configuration. Like this:
+   
 # API Keys
+'''
 GROQ_API_KEY=your_groq_api_key
 TODOIST_API_TOKEN=your_todoist_token
 
@@ -64,6 +66,8 @@ TODOIST_API_TOKEN=your_todoist_token
 GROQ_MODEL_NAME=llama-3.3-70b-versatile
 BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg
 MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
+'''
+
       or
 2. click on the setup button in the app to add the api keys
 
@@ -72,8 +76,10 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 ### Running the Application
 
 ```bash
-#Make sure the environment is activated by 
+#Make sure the environment is activated by
 source venv/bin/activate
+'''
+
 #The prompt will change to have (venv) at the beginning of the line. Then run
 python Productivity.py
 ```
