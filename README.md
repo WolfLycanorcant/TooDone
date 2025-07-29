@@ -139,7 +139,7 @@ source venv/bin/activate
 
 #The prompt will change to have (venv) at the beginning of the line, showing you entered the venv environment. Installing your dependencies this way with an environment prevents python libraries and dependencies from conflicting with eachother,
 
-### Step 4: Install Dependencies within (venv). Run the command:
+### Step 4: Install Dependencies within (venv) by running the command:
 
 ```bash
 pip install -r requirements.txt
