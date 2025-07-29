@@ -80,12 +80,15 @@ copy .env.example and rename it the shorter name of .env
 
 1. Edit the `.env` file and add your API keys and configuration. Like this:
 
-"GROQ_API_KEY=your_groq_api_key
+```bash
+GROQ_API_KEY=your_groq_api_key 
 TODOIST_API_TOKEN=your_todoist_token
 
-GROQ_MODEL_NAME=llama-3.3-70b-versatile
-BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg
-MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1"
+GROQ_MODEL_NAME=llama-3.3-70b-versatile 
+BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
+MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
+```
+
 
       
 2. OR fill in the premade fields by clicking on the setup button in the app to add your api keys
