@@ -59,7 +59,7 @@ python3 -m venv venv
 
 To enter the environment run
 
-''' 'code' bash
+```bash
 source venv/bin/activate
 ```
 
