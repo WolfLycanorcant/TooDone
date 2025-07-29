@@ -1,1 +1,60 @@
+# Default ignore rules
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific - explicitly include these files
+!.env.example
+!Productivity_App_Start.exe
+!LICENSE
+
+# Allow empty directories
+!.gitkeep
+
+# Include empty directories but ignore their contents
+/venv/*
+!/venv/.gitkeep
+
+/Calendar Converter/*
+!/Calendar Converter/.gitkeep
+
+/alarm/*
+!/alarm/.gitkeep
+
+# Include graphics directory structure but ignore its contents
+/graphics/*
+!/graphics/.gitkeep
+
+# Include other directories we want to track
+!broadcasts/
+!batch_activators/
+!helpers/
+
+# Root level files to include
+!*.exe
+!.env.example
+!LICENSE
+!.gitignore
 
