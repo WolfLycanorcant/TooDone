@@ -46,14 +46,13 @@ python -m venv venv
 .\venv\Scripts\activate
 ```
 
-### Step 3: Create a .env file
+### Step 3: Create an .env file
 
 make a copy of the example environment file, but change the name of the file:
 
-copy .env.example and rename it the shorter name of .env
+make a copy of .env.example and rename it the shorter name of .env
 
-
-You can choose to edit the `.env` file and add your API keys and configuration. Like this:
+You can choose to edit the `.env` file that was a copy of .env.example and paste in your API keys. Like this:
 
 ```bash
 GROQ_API_KEY=your_groq_api_key #paste over
@@ -65,7 +64,7 @@ MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
 ```
 
 
-# On macOS/Linux
+# On macOS
 
 Set up the environment
 
@@ -79,7 +78,57 @@ To enter the environment run
 source venv/bin/activate
 ```
 
-If changing an api key is required after setup there are premade app fields you can click in the setup page by using the setup page button on the lower right in the app and paste your api keys
+On MacOS you can choose to edit the `.env` file and add your API keys. Use a text editor to open the .env file and paste your api keys... Like this:
+
+```bash
+GROQ_API_KEY=your_groq_api_key #paste over
+TODOIST_API_TOKEN=your_todoist_token #paste over
+
+GROQ_MODEL_NAME=llama-3.3-70b-versatile 
+BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
+MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
+```
+
+# On Linux
+
+Set up the environment
+(Recomended: simply copy .env.example where you name the copy .env changing it from .env.example
+
+```bash
+cp .env.example ~/.env
+```
+
+Edit the file with nono or other text editor
+
+```bash
+nano ~/.env
+```
+
+Edit the File
+```bash
+GROQ_API_KEY=your_groq_api_key #enter your api key for Groq
+TODOIST_API_TOKEN=your_todoist_token #enter your api key for TODOIST
+
+GROQ_MODEL_NAME=llama-3.3-70b-versatile 
+BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg 
+MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
+```
+
+Now create the environment in Linux with 
+
+```bash
+python3 -m venv venv
+```
+
+To enter the environment run
+
+```bash
+source venv/bin/activate
+```
+
+#Do not upload the .env file after you put the api keys in. The api keys may get deactivated or worse someone can charge up a bill on you.
+
+If changing an api key is required after setup there are premade app fields you can click on, in the setup window, by using the setup page button on the lower right of the app and paste your api keys
 
 ### Running the Application
 Again, make sure the environment is activated by
@@ -88,26 +137,28 @@ Again, make sure the environment is activated by
 source venv/bin/activate
 ```
 
-#The prompt will change to have (venv) at the beginning of the line. Then run
+#The prompt will change to have (venv) at the beginning of the line, showing you entered the venv environment. Installing your dependencies this way with an environment prevents python libraries and dependencies from conflicting with eachother,
 
-### Step 4: Install Dependencies
+### Step 4: Install Dependencies within (venv). Run the command:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage after Steps 1-4
 
+run the python command to launch the application
 **Command Line:** `python Productivity.py`
 
-Or you can double click the exe file labeled Productivity_App_Start.exe, after environment confiuration using defaults. If it doesnt work
+#Windows
+Or, on a Windows PC, you can double click the exe file labeled Productivity_App_Start.exe, after environment configuration, but only if you set up venv using defaults and the method above using defaults. If the Productivity_App_Start.exe fails for any reason, again you can launch the application in Windows command line with..
 
 **Command Line:** `python Productivity.py`
-
+OR
 > 🔘 **Launch:** `./Productivity_App_Start.exe`
 
 
-### Basic Hot key shortcut Commands
+### Basic Hot key shortcut Commands Support (Windows Only)
 
 🆕  Ctrl + N  →  Create a new task  
 🔍  Ctrl + F  →  Search tasks  
@@ -120,8 +171,8 @@ Or you can double click the exe file labeled Productivity_App_Start.exe, after e
 
 ```
 TooDone/
-├── .env.example           # Example environment configuration
-├── .gitignore            # Git ignore rules
+├── .env.example          # Example environment configuration -> Change this to .env
+├── .gitignore            # Git ignore rules -> this file is a settings file for if you want to upload into your own repository, it will ignore the venv environment folder and .env but will upload .env.example
 ├── LICENSE               # License file
 ├── Productivity.py       # Main application file
 ├── Productivity_App_Start.exe  # Windows executable
