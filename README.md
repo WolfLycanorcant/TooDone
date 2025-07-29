@@ -51,12 +51,14 @@ python -m venv venv
 
 # On macOS/Linux
 
-#set up the environment
+Set up the environment
+
 '''bash
 python3 -m venv venv
 '''
 
-#To enter the environment run
+To enter the environment run
+
 '''bash
 source venv/bin/activate
 ```
@@ -78,25 +80,22 @@ copy .env.example and rename it the shorter name of .env
 
 1. Edit the `.env` file and add your API keys and configuration. Like this:
 
-'''bash
-GROQ_API_KEY=your_groq_api_key
+"GROQ_API_KEY=your_groq_api_key
 TODOIST_API_TOKEN=your_todoist_token
 
 GROQ_MODEL_NAME=llama-3.3-70b-versatile
 BACKGROUND_IMAGE_PATH=graphics/background/mountain-surrounded-with-fog.jpg
-MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1
-'''
+MINIMIZE_TEXT_COLOR=0.0,0.0,0.0,1"
 
-      or
       
-2. click on the setup button in the app to add the api keys
+2. OR fill in the premade fields by clicking on the setup button in the app to add your api keys
 
 ## Usage
 
 ### Running the Application
+Make sure the environment is activated by
 
 ```bash
-#Make sure the environment is activated by
 source venv/bin/activate
 '''
 
