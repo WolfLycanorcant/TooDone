@@ -100,7 +100,7 @@ Make sure the environment is activated by
 
 ```bash
 source venv/bin/activate
-'''
+```
 
 
 #The prompt will change to have (venv) at the beginning of the line. Then run
