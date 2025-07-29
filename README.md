@@ -107,11 +107,9 @@ TooDone/
 ├── Productivity_App_Start.exe  # Windows executable
 ├── README.md             # This file
 ├── alarm/                # Alarm functionality
-├── batch_activators/     # Batch scripts for automation
 ├── broadcasts/           # System broadcasts and notifications
 ├── Calendar Converter/   # Calendar integration tools
 ├── graphics/             # Application assets and icons
-└── helpers/              # Utility functions and helpers
 ```
 
 ## Contributing
