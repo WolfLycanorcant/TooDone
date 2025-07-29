@@ -53,13 +53,13 @@ python -m venv venv
 
 Set up the environment
 
-'''bash
+''' 'code' bash
 python3 -m venv venv
 '''
 
 To enter the environment run
 
-'''bash
+''' 'code' bash
 source venv/bin/activate
 ```
 
