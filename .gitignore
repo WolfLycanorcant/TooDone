@@ -25,36 +25,22 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# Project specific - explicitly include these files
+# Root Files - explicitly include these files
 !.env.example
-!Productivity_App_Start.exe
-!LICENSE
-
-# Allow empty directories
-!.gitkeep
-
-# Include empty directories but ignore their contents
-/venv/*
-!/venv/.gitkeep
-
-/Calendar Converter/*
-!/Calendar Converter/.gitkeep
-
-/alarm/*
-!/alarm/.gitkeep
-
-# Include graphics directory structure but ignore its contents
-/graphics/*
-!/graphics/.gitkeep
-
-# Include other directories we want to track
-!broadcasts/
-!batch_activators/
-!helpers/
-
-# Root level files to include
-!*.exe
-!.env.example
-!LICENSE
 !.gitignore
+!ENV.bat
+!LICENSE
+!Productivity_App_Start.exe
+!Productivity.py
+!README.md
+!requirements.txt
 
+# Include directories we want to track
+!/broadcasts/**
+!/graphics/**
+!/alarm/**
+!/Calendar Converter/**
+
+# Exclude directories we don't want to track    
+batch_activators/** 
+helpers/** 
