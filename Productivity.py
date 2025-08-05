@@ -1638,23 +1638,67 @@ class ProductivityApp(App):
         """Sync tasks.json to Todoist using import_todoist.py"""
         import os, sys, subprocess
         from kivy.clock import Clock
+        
+        # Validate file structure first
         base_dir = os.getcwd()
         script_path = os.path.join(base_dir, "Calendar Converter", "import_todoist.py")
         input_json = os.path.join(base_dir, TASKS_FILE)
         csv_path = os.path.join(base_dir, "Calendar Converter", "todoist_import.csv")
+        
+        # Check if required files/directories exist
+        if not os.path.exists(os.path.join(base_dir, "Calendar Converter")):
+            show_error_popup("Error: 'Calendar Converter' folder not found in project root.")
+            return
+            
+        if not os.path.exists(script_path):
+            show_error_popup(f"Error: import_todoist.py script not found at:\n{script_path}")
+            return
+            
+        if not os.path.exists(input_json):
+            show_error_popup(f"Error: tasks.json file not found at:\n{input_json}")
+            return
+        
+        # Check API token
         token = os.getenv("TODOIST_API_TOKEN")
         if not token:
-            show_error_popup("Please set TODOIST_API_TOKEN in your environment or .env file.")
+            show_error_popup("Please set TODOIST_API_TOKEN in your .env file.\n\nGet your token from:\nhttps://todoist.com/prefs/integrations")
             return
+        
+        # Ensure Calendar Converter directory has write permissions
+        try:
+            test_file = os.path.join(base_dir, "Calendar Converter", "test_write.tmp")
+            with open(test_file, 'w') as f:
+                f.write("test")
+            os.remove(test_file)
+        except Exception as e:
+            show_error_popup(f"Error: No write permission in Calendar Converter directory:\n{e}")
+            return
+        
         def run_sync(dt):
             try:
-                proc = subprocess.run([sys.executable, script_path, input_json, "--csv", csv_path, "--token", token], capture_output=True, text=True)
+                # Run the sync script
+                proc = subprocess.run([sys.executable, script_path, input_json, "--csv", csv_path, "--token", token], 
+                                    capture_output=True, text=True, timeout=30)
+                
                 if proc.returncode == 0:
-                    show_confirmation_popup(f"Tasks synced to Todoist.\nCSV: {csv_path}")
+                    # Count tasks that were synced
+                    tasks_data = self.load_tasks()
+                    todoist_tasks = [t for t in tasks_data if t.get('todone', False) and not t.get('completed', False)]
+                    
+                    show_confirmation_popup(f"Successfully synced {len(todoist_tasks)} tasks to Todoist!\n\nCSV file created: {csv_path}")
                 else:
-                    show_error_popup(f"Sync failed:\n{proc.stderr}")
+                    error_msg = proc.stderr.strip() if proc.stderr.strip() else proc.stdout.strip()
+                    if not error_msg:
+                        error_msg = f"Sync failed with return code {proc.returncode}"
+                    show_error_popup(f"Sync failed:\n{error_msg}")
+                    
+            except subprocess.TimeoutExpired:
+                show_error_popup("Sync timed out. Please check your internet connection and try again.")
+            except FileNotFoundError:
+                show_error_popup(f"Python interpreter not found. Please ensure Python is installed and accessible.")
             except Exception as e:
-                show_error_popup(f"Exception during sync:\n{e}")
+                show_error_popup(f"Exception during sync:\n{str(e)}")
+                
         Clock.schedule_once(run_sync, 0)
 
         from kivy.uix.filechooser import FileChooserIconView
