@@ -17,6 +17,7 @@ cython>=0.29.23
 # Optional Dependencies
 # Uncomment these if you need additional functionality
 # groq>=0.3.0           # For Groq API integration
+requests>=2.25.1       # For HTTP requests (Todoist API)
 # python-todoist         # For Todoist integration
 
 # Platform-specific dependencies
