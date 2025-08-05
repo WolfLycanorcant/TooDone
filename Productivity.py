@@ -736,7 +736,9 @@ class ProductivityApp(App):
                         if 'task' not in task or not str(task['task']).strip():
                             if 'titleHistory' in task and task['titleHistory'] and isinstance(task['titleHistory'], list) and task['titleHistory'][-1].get('title'): task['task'] = task['titleHistory'][-1]['title']
                             else: task['task'] = f'Untitled Task {i+1}'; logging.warning(f"Task {i} had missing/empty title, assigned fallback.")
-                        task.setdefault('timer_running', False); task.setdefault('completed', False); task.setdefault('annotations', []); task.setdefault('alarms', []); task.setdefault('timer', 0); task.setdefault('start_time_unix', None); task.setdefault('due_date', None); task.setdefault('icon', None); task.setdefault('localTime', datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z')); task.setdefault('createdAt', now_iso); task.setdefault('titleHistory', [])
+                        task.setdefault('timer_running', False); task.setdefault('completed', False); task.setdefault('annotations', []); task.setdefault('alarms', []); task.setdefault('timer', 0); task.setdefault('start_time_unix', None); task.setdefault('due_date', None); task.setdefault('icon', None); task.setdefault('localTime', datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z')); task.setdefault('createdAt', now_iso); task.setdefault('titleHistory', []); task.setdefault('subtasks', []); task.setdefault('subtasks_visible', True)
+                        # Initialize subtasks recursively
+                        self._initialize_subtasks(task)
                         if not isinstance(task.get('timer'), (int, float)): task['timer'] = 0
                         if not isinstance(task.get('start_time_unix'), (int, float, type(None))): task['start_time_unix'] = None
                         if not isinstance(task.get('annotations'), list): task['annotations'] = []
@@ -764,6 +766,234 @@ class ProductivityApp(App):
         except FileNotFoundError: logging.warning(f"{TASKS_FILE} not found. Starting with an empty task list."); return []
         except json.JSONDecodeError as e: logging.error(f"Error decoding {TASKS_FILE}: {e}. Starting empty.", exc_info=True); show_error_popup(f"Error reading tasks file:\n{TASKS_FILE}\nStarting with empty list."); return []
         except Exception as e: logging.error(f"Unexpected error loading tasks: {e}", exc_info=True); show_error_popup(f"Failed to load tasks.\nSee console for details.\nStarting empty list."); return []
+
+    def _initialize_subtasks(self, task):
+        """Recursively initialize subtasks with default values"""
+        if 'subtasks' not in task:
+            task['subtasks'] = []
+        
+        now_iso = datetime.now().isoformat()
+        for subtask in task['subtasks']:
+            subtask.setdefault('timer_running', False)
+            subtask.setdefault('completed', False)
+            subtask.setdefault('annotations', [])
+            subtask.setdefault('alarms', [])
+            subtask.setdefault('timer', 0)
+            subtask.setdefault('start_time_unix', None)
+            subtask.setdefault('due_date', None)
+            subtask.setdefault('icon', None)
+            subtask.setdefault('localTime', datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z'))
+            subtask.setdefault('createdAt', now_iso)
+            subtask.setdefault('titleHistory', [])
+            subtask.setdefault('subtasks', [])
+            
+            # Recursively initialize nested subtasks
+            self._initialize_subtasks(subtask)
+
+    def add_subtask(self, parent_task, subtask_name):
+        """Add a subtask to a parent task"""
+        if not subtask_name or not subtask_name.strip():
+            show_error_popup("Subtask name cannot be empty.")
+            return
+        
+        try:
+            now_iso = datetime.now().isoformat()
+            new_subtask = {
+                'task': subtask_name.strip(),
+                'timer': 0,
+                'localTime': datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z'),
+                'createdAt': now_iso,
+                'timer_running': False,
+                'start_time_unix': None,
+                'completed': False,
+                'due_date': None,
+                'icon': None,
+                'alarms': [],
+                'annotations': [],
+                'titleHistory': [{'title': subtask_name.strip(), 'timestamp': now_iso}],
+                'subtasks': []
+            }
+            
+            if 'subtasks' not in parent_task:
+                parent_task['subtasks'] = []
+            
+            parent_task['subtasks'].append(new_subtask)
+            self.mark_tasks_changed()
+            self.update_task_view()
+            logging.info(f"Added subtask: {subtask_name} to parent task: {parent_task.get('task', 'Unknown')}")
+            
+        except Exception as e:
+            logging.error(f"Error adding subtask '{subtask_name}': {e}", exc_info=True)
+            show_error_popup("Failed to add the subtask.")
+
+    def delete_subtask(self, parent_task, subtask_index):
+        """Delete a subtask from a parent task"""
+        try:
+            if 'subtasks' not in parent_task or not (0 <= subtask_index < len(parent_task['subtasks'])):
+                show_error_popup("Invalid subtask index.")
+                return
+            
+            subtask_to_delete = parent_task['subtasks'][subtask_index]
+            subtask_name = subtask_to_delete.get('task', 'Unknown')
+            
+            # Cancel any alarms for this subtask
+            for alarm in subtask_to_delete.get('alarms', []):
+                alarm_id = alarm.get('id')
+                if alarm_id:
+                    event = self.scheduled_alarms.pop(alarm_id, None)
+                    if event:
+                        event.cancel()
+                        logging.info(f"Cancelled alarm {alarm_id} for subtask being deleted.")
+            
+            del parent_task['subtasks'][subtask_index]
+            self.mark_tasks_changed()
+            self.update_task_view()
+            logging.info(f"Deleted subtask: {subtask_name}")
+            
+        except Exception as e:
+            logging.error(f"Error deleting subtask at index {subtask_index}: {e}", exc_info=True)
+            show_error_popup("Failed to delete the subtask.")
+
+    def toggle_subtask_completion(self, subtask):
+        """Toggle completion status of a subtask"""
+        try:
+            subtask['completed'] = not subtask.get('completed', False)
+            self.mark_tasks_changed()
+            self.update_task_view()
+            logging.info(f"Toggled subtask completion: {subtask.get('task', 'Unknown')} -> {subtask['completed']}")
+        except Exception as e:
+            logging.error(f"Error toggling subtask completion: {e}", exc_info=True)
+            show_error_popup("Failed to toggle subtask completion.")
+
+    def get_subtask_completion_stats(self, task):
+        """Get completion statistics for a task's subtasks"""
+        if 'subtasks' not in task or not task['subtasks']:
+            return 0, 0  # completed, total
+        
+        total = len(task['subtasks'])
+        completed = sum(1 for subtask in task['subtasks'] if subtask.get('completed', False))
+        return completed, total
+
+    def _create_subtasks_container(self, parent_index, parent_task):
+        """Create UI container for displaying and managing subtasks"""
+        container = BoxLayout(orientation='vertical', size_hint_y=None, spacing=dp(1))
+        container.bind(minimum_height=container.setter('height'))
+        
+        # Add existing subtasks
+        for subtask_index, subtask in enumerate(parent_task.get('subtasks', [])):
+            subtask_row = self._create_subtask_row(parent_index, subtask_index, subtask, parent_task)
+            container.add_widget(subtask_row)
+        
+        return container
+
+    def _create_subtask_row(self, parent_index, subtask_index, subtask, parent_task):
+        """Create a single subtask row"""
+        row = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(35), spacing=dp(5))
+        row.padding = (dp(30), dp(2), dp(5), dp(2))  # Indent subtasks
+        
+        # Completion checkbox
+        checkbox = Button(
+            text='✓' if subtask.get('completed', False) else '',
+            size_hint=(None, None),
+            size=(dp(25), dp(25)),
+            background_normal='',
+            background_color=(0.8, 1, 0.8, 1) if subtask.get('completed', False) else (1, 1, 1, 1)
+        )
+        def toggle_completion(instance):
+            self.toggle_subtask_completion(subtask)
+        checkbox.bind(on_press=toggle_completion)
+        row.add_widget(checkbox)
+        
+        # Subtask title
+        title = subtask.get('task', 'Untitled Subtask')
+        title_display = f"[s]{title}[/s]" if subtask.get('completed', False) else title
+        
+        subtask_label = Label(
+            text=title_display,
+            markup=True,
+            halign='left',
+            valign='middle',
+            font_size=dp(12),
+            color=(0, 0, 0, 1)  # Black text
+        )
+        subtask_label.bind(size=lambda *args: setattr(subtask_label, 'text_size', (subtask_label.width, None)))
+        row.add_widget(subtask_label)
+        
+        # Delete subtask button
+        delete_btn = Button(
+            text='×',
+            size_hint=(None, None),
+            size=(dp(25), dp(25)),
+            background_color=(1, 0.7, 0.7, 1)
+        )
+        def delete_subtask_action(instance):
+            self.delete_subtask(parent_task, subtask_index)
+        delete_btn.bind(on_press=delete_subtask_action)
+        row.add_widget(delete_btn)
+        
+        # Add subtask button (for nested subtasks)
+        add_nested_btn = Button(
+            text='+',
+            size_hint=(None, None),
+            size=(dp(25), dp(25)),
+            background_color=(0.8, 0.8, 1, 1)
+        )
+        def add_nested_subtask_action(instance):
+            self._show_add_subtask_popup(subtask)
+        add_nested_btn.bind(on_press=add_nested_subtask_action)
+        row.add_widget(add_nested_btn)
+        
+        return row
+
+    def _show_add_subtask_popup(self, parent_task):
+        """Show popup to add a new subtask"""
+        content = BoxLayout(orientation='vertical', spacing=dp(10), padding=dp(10))
+        
+        subtask_input = TextInput(
+            hint_text='Enter subtask name',
+            multiline=False,
+            size_hint_y=None,
+            height=dp(40)
+        )
+        content.add_widget(subtask_input)
+        
+        button_layout = BoxLayout(size_hint_y=None, height=dp(40), spacing=dp(10))
+        
+        save_button = Button(text='Add')
+        cancel_button = Button(text='Cancel')
+        
+        button_layout.add_widget(save_button)
+        button_layout.add_widget(cancel_button)
+        content.add_widget(button_layout)
+        
+        popup = Popup(
+            title='Add Subtask',
+            content=content,
+            size_hint=(0.7, None),
+            height=dp(180),
+            auto_dismiss=False
+        )
+        
+        def save_action(instance):
+            subtask_name = subtask_input.text.strip()
+            if subtask_name:
+                self.add_subtask(parent_task, subtask_name)
+                popup.dismiss()
+            else:
+                show_error_popup("Subtask name cannot be empty.")
+        
+        def cancel_action(instance):
+            popup.dismiss()
+        
+        save_button.bind(on_press=save_action)
+        cancel_button.bind(on_press=cancel_action)
+        
+        # Allow Enter key to save
+        def on_text_validate(instance):
+            save_action(instance)
+        subtask_input.bind(on_text_validate=on_text_validate)
+        
+        popup.open()
 
     def save_tasks(self, force=False):
         # Always save meta (colors, date_colors) and tasks
@@ -988,7 +1218,7 @@ class ProductivityApp(App):
     def _create_right_layout(self):
         layout = BoxLayout(orientation='vertical', size_hint=(0.3, 1), spacing=dp(10)); layout.add_widget(self._create_time_display_widgets())
         scroll = ScrollView(size_hint=(1, 1), do_scroll_x=False, bar_width=dp(10)); button_grid = GridLayout(cols=1, spacing=dp(5), size_hint_y=None); button_grid.bind(minimum_height=button_grid.setter('height'))
-        buttons_config = [("Add Task", self.add_task_gui, False, True), ("Move Up", self.move_task_up_gui, False, False), ("Move Down", self.move_task_down_gui, False, False), ("Change Title", self.change_task_title_gui, False, False), ("Mark Completed", self.mark_as_completed_gui, False, False), (None, None, True, False), ("Delete Task", self.delete_task_gui, False, False), ("Set Due Date", self.set_due_date_gui, False, False), ("Set Alarm", self.set_alarm_gui, False, False), ("Annotate Task", self.annotate_task_gui_proxy, False, False), (None, None, True, False), ("Add Gratitude", self.add_gratitude_gui, False, True), (None, None, True, False), ("Start Timer", self.start_timer_gui, False, False), ("Stop Timer", self.stop_timer_gui, False, False), ("Reset Timer", self.reset_timer_gui, False, False), (None, None, True, False), ("Export Tasks", self.export_tasks_gui, False, True), ("Import Tasks", self.import_tasks_gui, False, True), ("Sync to Todoist", self.sync_to_todoist_gui, False, True), (None, None, True, False), ("Customize", self.customize_gui, False, True), ("Setup", self.setup_gui, False, True), (None, None, True, False), ("Minimize", self.minimize_app, False, True)]
+        buttons_config = [("Add Task", self.add_task_gui, False, True), ("Move Up", self.move_task_up_gui, False, False), ("Move Down", self.move_task_down_gui, False, False), ("Change Title", self.change_task_title_gui, False, False), ("Mark Completed", self.mark_as_completed_gui, False, False), (None, None, True, False), ("Add Subtask", self.add_subtask_gui, False, False), ("Toggle Subtasks", self.toggle_subtasks_gui, False, False), (None, None, True, False), ("Delete Task", self.delete_task_gui, False, False), ("Set Due Date", self.set_due_date_gui, False, False), ("Set Alarm", self.set_alarm_gui, False, False), ("Annotate Task", self.annotate_task_gui_proxy, False, False), (None, None, True, False), ("Add Gratitude", self.add_gratitude_gui, False, True), (None, None, True, False), ("Start Timer", self.start_timer_gui, False, False), ("Stop Timer", self.stop_timer_gui, False, False), ("Reset Timer", self.reset_timer_gui, False, False), (None, None, True, False), ("Export Tasks", self.export_tasks_gui, False, True), ("Import Tasks", self.import_tasks_gui, False, True), ("Sync to Todoist", self.sync_to_todoist_gui, False, True), (None, None, True, False), ("Customize", self.customize_gui, False, True), ("Setup", self.setup_gui, False, True), (None, None, True, False), ("Minimize", self.minimize_app, False, True)]
         self.action_buttons = {}
         for text, callback, is_spacer, enabled in buttons_config:
             if is_spacer: button_grid.add_widget(BoxLayout(size_hint_y=None, height=dp(10)))
@@ -998,16 +1228,27 @@ class ProductivityApp(App):
         time_layout = BoxLayout(orientation='vertical', spacing=dp(5), size_hint_y=None, height=dp(130)); time_layout.add_widget(Label(text='Philippines Time (PHT)', size_hint_y=None, height=dp(20))); self.ph_time_display = TextInput(readonly=True, size_hint_y=None, height=dp(35), halign='center'); self.ph_time_display.bind(on_touch_down=self.on_time_field_right_click); time_layout.add_widget(self.ph_time_display); time_layout.add_widget(Label(text='Houston Time (CST/CDT)', size_hint_y=None, height=dp(20))); self.houston_time_display = TextInput(readonly=True, size_hint_y=None, height=dp(35), halign='center'); self.houston_time_display.bind(on_touch_down=self.on_time_field_right_click); time_layout.add_widget(self.houston_time_display); reset_button = Button(text='Reset Time to System', size_hint_y=None, height=dp(30), on_press=self.reset_time_to_system); time_layout.add_widget(reset_button); return time_layout
 
     # --- Task Data Handling ---
-    def add_task(self, task_name):
+    def add_task(self, task_name, parent_task=None, parent_index=None):
         if not task_name or not task_name.strip(): show_error_popup("Task name cannot be empty."); return
         try:
-            now_iso = datetime.now().isoformat(); new_task = {'task': task_name.strip(), 'timer': 0, 'localTime': datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z'), 'createdAt': now_iso, 'timer_running': False, 'start_time_unix': None, 'completed': False, 'due_date': None, 'icon': None, 'alarms': [], 'annotations': [], 'titleHistory': [{'title': task_name.strip(), 'timestamp': now_iso}]}
-            self.tasks.insert(0, new_task); self.mark_tasks_changed(); self.update_task_view(); logging.info(f"Added task: {task_name}")
-            new_index = 0; self.select_task(new_index)
-            if hasattr(self, 'task_list_layout') and new_index in self.task_widgets:
-                scroll_view = self.task_list_layout.parent
-                if scroll_view: widget_to_scroll = self.task_widgets.get(new_index);
-                if widget_to_scroll: scroll_view.scroll_to(widget_to_scroll, padding=dp(10), animate=True)
+            now_iso = datetime.now().isoformat(); new_task = {'task': task_name.strip(), 'timer': 0, 'localTime': datetime.now(PH_TZ).strftime('%Y-%m-%d %H:%M:%S %Z'), 'createdAt': now_iso, 'timer_running': False, 'start_time_unix': None, 'completed': False, 'due_date': None, 'icon': None, 'alarms': [], 'annotations': [], 'titleHistory': [{'title': task_name.strip(), 'timestamp': now_iso}], 'subtasks': []}
+            
+            if parent_task is not None:
+                # Adding as subtask
+                if 'subtasks' not in parent_task:
+                    parent_task['subtasks'] = []
+                parent_task['subtasks'].insert(0, new_task)
+                logging.info(f"Added subtask: {task_name} to parent task")
+            else:
+                # Adding as main task
+                self.tasks.insert(0, new_task); new_index = 0; self.select_task(new_index)
+                if hasattr(self, 'task_list_layout') and new_index in self.task_widgets:
+                    scroll_view = self.task_list_layout.parent
+                    if scroll_view: widget_to_scroll = self.task_widgets.get(new_index);
+                    if widget_to_scroll: scroll_view.scroll_to(widget_to_scroll, padding=dp(10), animate=True)
+                logging.info(f"Added main task: {task_name}")
+            
+            self.mark_tasks_changed(); self.update_task_view()
         except Exception as e: logging.error(f"Error adding task '{task_name}': {e}", exc_info=True); show_error_popup("Failed to add the task.")
     def delete_task(self, index):
         if not (0 <= index < len(self.tasks)): logging.warning(f"Invalid index {index} for delete_task."); show_error_popup(f"Cannot delete task at invalid index {index}."); return
@@ -1252,9 +1493,49 @@ class ProductivityApp(App):
         # ... (add timer_label and stop_timer_label to info_layout as before)
 
         # Continue with the rest of your row creation logic
-        title = task.get('task', 'Untitled Task'); is_completed = task.get('completed', False); title_display = f"[s]{title}[/s]" if is_completed else title; display_text = f"[size={int(dp(16))}]{title_display}[/size]\n[size={int(dp(11))}]Created: {formatted_created_time}[/size]"
-        task_button = Button(size_hint_x=0.75, markup=True, halign='left', valign='top', text=display_text, padding=(dp(10), dp(8)))
-        task_button.bind(size=lambda *args: setattr(task_button, 'text_size', (task_button.width - task_button.padding[0]*2, None))); task_button.bind(on_press=lambda instance, i=index: self.select_task(i)); task_row.add_widget(task_button)
+        title = task.get('task', 'Untitled Task'); is_completed = task.get('completed', False); title_display = f"[s]{title}[/s]" if is_completed else title
+        
+        # Add subtask completion stats to display
+        completed_subtasks, total_subtasks = self.get_subtask_completion_stats(task)
+        
+        # Show subtask info differently based on visibility
+        subtasks_visible = task.get('subtasks_visible', True)
+        if total_subtasks > 0:
+            if subtasks_visible:
+                # When subtasks are visible, show completion stats
+                subtask_info = f" ({completed_subtasks}/{total_subtasks})"
+            else:
+                # When subtasks are hidden, show count with indicator
+                subtask_info = f" [+{total_subtasks} subtasks]"
+                logging.info(f"Task '{title}' has hidden subtasks, showing: {subtask_info}")
+        else:
+            subtask_info = ""
+        
+        # Create main task container to hold both task button and subtasks
+        task_container = BoxLayout(orientation='vertical', size_hint_x=0.75, spacing=dp(2))
+        
+        display_text = f"[size={int(dp(16))}]{title_display}{subtask_info}[/size]\n[size={int(dp(11))}]Created: {formatted_created_time}[/size]"
+        task_button = Button(size_hint_y=None, height=dp(60), markup=True, halign='left', valign='top', text=display_text, padding=(dp(10), dp(8)))
+        task_button.bind(size=lambda *args: setattr(task_button, 'text_size', (task_button.width - task_button.padding[0]*2, None)))
+        # Add right-click functionality to toggle subtask visibility
+        def on_task_button_touch(instance, touch, task_index=index):
+            if instance.collide_point(*touch.pos):
+                if touch.button == 'left':
+                    self.select_task(task_index)
+                    return True
+                elif touch.button == 'right' and len(self.tasks[task_index].get('subtasks', [])) > 0:
+                    self.toggle_subtask_visibility(task_index)
+                    return True
+            return False
+        task_button.bind(on_touch_down=on_task_button_touch)
+        task_container.add_widget(task_button)
+        
+        # Show subtasks container if there are subtasks and they're visible
+        if total_subtasks > 0 and task.get('subtasks_visible', True):
+            subtasks_container = self._create_subtasks_container(index, task)
+            task_container.add_widget(subtasks_container)
+        
+        task_row.add_widget(task_container)
         info_layout = BoxLayout(orientation='vertical', size_hint_x=0.25, spacing=dp(2), padding=(0, dp(5), dp(5), dp(5)))
         info_layout.is_info_layout = True
         # Only add the unified timer_label (already created above) to info_layout
@@ -1422,11 +1703,12 @@ class ProductivityApp(App):
 
     def update_action_buttons_state(self):
         has_selection = self.selected_index is not None and 0 <= self.selected_index < len(self.tasks); can_move_up = has_selection and self.selected_index > 0; can_move_down = has_selection and self.selected_index < len(self.tasks) - 1
-        button_states = {"Move Up": False, "Move Down": False, "Change Title": False, "Mark Completed": False, "Delete Task": False, "Set Due Date": False, "Set Alarm": False, "Annotate Task": False, "Start Timer": False, "Stop Timer": False, "Reset Timer": False,}
+        button_states = {"Move Up": False, "Move Down": False, "Change Title": False, "Mark Completed": False, "Delete Task": False, "Set Due Date": False, "Set Alarm": False, "Annotate Task": False, "Add Subtask": False, "Toggle Subtasks": False, "Start Timer": False, "Stop Timer": False, "Reset Timer": False,}
         mark_complete_text = "Mark Completed"
         if has_selection:
             task = self.tasks[self.selected_index]; is_running = task.get('timer_running', False); has_time = task.get('timer', 0) > 0; is_completed = task.get('completed', False)
-            button_states.update({"Move Up": can_move_up, "Move Down": can_move_down, "Change Title": True, "Mark Completed": True, "Delete Task": True, "Set Due Date": True, "Set Alarm": True, "Annotate Task": True, "Start Timer": not is_running and not is_completed, "Stop Timer": is_running, "Reset Timer": (has_time or is_running) and not is_completed,})
+            has_subtasks = len(task.get('subtasks', [])) > 0
+            button_states.update({"Move Up": can_move_up, "Move Down": can_move_down, "Change Title": True, "Mark Completed": True, "Delete Task": True, "Set Due Date": True, "Set Alarm": True, "Annotate Task": True, "Add Subtask": True, "Toggle Subtasks": has_subtasks, "Start Timer": not is_running and not is_completed, "Stop Timer": is_running, "Reset Timer": (has_time or is_running) and not is_completed,})
             mark_complete_text = "Undo Mark Completed" if is_completed else "Mark Completed"
         for key, button in self.action_buttons.items():
             if key in button_states: button.disabled = not button_states[key];
@@ -2718,6 +3000,47 @@ class ProductivityApp(App):
                 button = next((w for w in row.children if isinstance(w, Button)), None)
                 if button:
                     self.update_task_row_style(task_index, row, button)
+
+    def add_subtask_gui(self, instance):
+        """GUI handler for adding a subtask to the selected task"""
+        if self.selected_index is None:
+            show_error_popup("Select a task first.")
+            return
+        if not (0 <= self.selected_index < len(self.tasks)):
+            return
+        
+        selected_task = self.tasks[self.selected_index]
+        self._show_add_subtask_popup(selected_task)
+
+    def toggle_subtasks_gui(self, instance):
+        """GUI handler for toggling subtask visibility"""
+        if self.selected_index is None:
+            show_error_popup("Select a task first.")
+            return
+        if not (0 <= self.selected_index < len(self.tasks)):
+            return
+        
+        # Toggle subtask visibility using the new function
+        self.toggle_subtask_visibility(self.selected_index)
+
+    def toggle_subtask_visibility(self, task_index):
+        """Toggle visibility of subtasks for a specific task"""
+        if not (0 <= task_index < len(self.tasks)):
+            return
+        
+        task = self.tasks[task_index]
+        if len(task.get('subtasks', [])) == 0:
+            return  # No subtasks to toggle
+        
+        # Toggle visibility
+        current_visibility = task.get('subtasks_visible', True)
+        task['subtasks_visible'] = not current_visibility
+        
+        self.mark_tasks_changed()
+        self.update_task_view()
+        
+        visibility_text = "shown" if task['subtasks_visible'] else "hidden"
+        logging.info(f"Subtasks for task '{task.get('task', 'Unknown')}' are now {visibility_text}")
         self.update_action_buttons_state()
 
     def _on_timer_label_touch(self, instance, touch, idx):
